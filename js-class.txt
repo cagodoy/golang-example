@@ -1,0 +1,22 @@
+class Person {
+  private _name: string;
+  private _age: number;
+
+  constructor(name: string, age: number) {
+    this._name = name;
+    this._age = age;
+  }
+
+  public getName(): string {
+    return this._name;
+  }
+}
+
+class Teacher extends Person {
+  private _subject: string;
+
+  constructor(name: string, age: number, subject: string) {
+    super(name, age);
+    this._subject = subject;
+  }
+}
