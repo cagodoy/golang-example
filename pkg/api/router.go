@@ -1,8 +1,6 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/darchlabs/api-example/pkg/person"
 	"github.com/darchlabs/api-example/pkg/storage"
 	"github.com/julienschmidt/httprouter"
@@ -14,24 +12,13 @@ type response struct {
 	Error interface{} `json:"error,omitempty"`
 }
 
-func NewRouter() *httprouter.Router {
+func NewRouter(db *storage.S) *httprouter.Router {
 	// initialize router
 	router := httprouter.New()
 
-	// Open db
-	db, err := storage.New("storage.db")
-
-	if err != nil {
-		fmt.Println("Bad db opening %w", err)
-		return nil
-	}
-
-	// Initialize storage with leveldb db
-	s := person.New(db)
-
 	/* list persons */
 	// Set a route for the func that lists persons in the s db
-	router.GET("/api/v1/persons", listPersonsHandler(s))
+	router.GET("/api/v1/persons", listPersonsHandler(db))
 	/* add persons */
 	// Create person p var
 	p := &person.Person{
