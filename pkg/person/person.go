@@ -1,9 +1,16 @@
 package person
 
 type Person struct {
+	Id string `json:"id,omitempty"`
 	Name string `json:"name"`
 	Age  int64  `json:"age"`
-	// leveldb doesn't go here
+}
+
+func New(name string, age int64) *Person {
+	return &Person{
+		Name: name,
+		Age: age,
+	}	
 }
 
 // composition over inheritance

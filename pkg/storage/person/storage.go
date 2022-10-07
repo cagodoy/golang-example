@@ -1,71 +1,83 @@
-package person
+package personstorage
 
 import (
-	"fmt"
+	"encoding/json"
 
+	"github.com/darchlabs/api-example/pkg/person"
 	"github.com/darchlabs/api-example/pkg/storage"
-	"github.com/syndtr/goleveldb/leveldb/util"
+	"github.com/teris-io/shortid"
 )
 
-// Composition
-type Storage struct {
-	storage *storage.S
+type ps struct {
+	DB *storage.DB
 }
 
-func New(s *storage.S) *Storage {
-	return &Storage{
-		storage: s,
+func New(s *storage.DB) *ps {
+	return &ps{
+		DB: s,
 	}
 }
 
-func (s Storage) GetPersons() ([]*Person, error) {
-	// format the composed prefix key used in db
-	prefix := "Name:Age:"
 
-	data := make([]*Person, 0)
+func (s *ps) List() ([]*person.Person, error) {
+	// // format the composed prefix key used in db
+	// prefix := "Name:Age:"
 
-	iter := s.storage.DB.NewIterator(util.BytesPrefix([]byte(prefix)), nil)
-	for iter.Next() {
-		var pperson *Person
+	// data := make([]*Person, 0)
 
-		data = append(data, pperson)
+	// iter := s.storage.DB.NewIterator(util.BytesPrefix([]byte(prefix)), nil)
+	// for iter.Next() {
+	// 	var pperson *Person
 
-	}
+	// 	data = append(data, pperson)
 
-	iter.Release()
-	err := iter.Error()
+	// }
 
+	// iter.Release()
+	// err := iter.Error()
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// return data, nil
+	return nil, nil
+}
+
+func (s *ps) Create(p *person.Person) (*person.Person, error) {
+	// generate id for database
+	id, err := shortid.Generate()
 	if err != nil {
 		return nil, err
 	}
 
-	return data, nil
-}
+	// set generated id to person
+	p.Id = id
 
-func (s Storage) NewPerson(p Person) (int64, error) {
-	count := int64(0)
-
-	keys := "Persons:Name:Age:"
-	values := fmt.Sprintf(p.Name, p.Age)
-
-	err := s.storage.DB.Put([]byte(keys), []byte(values), nil)
-
-	if err != nil {
-		return 0, err
-	}
-
-	// increase in one the counter
-	count++
-
-	return count, nil
-}
-
-func (s *Storage) GetPersonByAge(age int64) ([]byte, error) {
-	data, err := s.storage.DB.Get([]byte(fmt.Sprintf("%v", age)), nil)
-
+	// JSON.stringify
+	b, err := json.Marshal(p)
 	if err != nil {
 		return nil, err
 	}
 
-	return data, err
+	// save in database
+	err = s.DB.DB.Put([]byte(id), b, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+
+// func (s *Storage) GetPersonByAge(age int64) ([]byte, error) {
+// 	data, err := s.storage.DB.Get([]byte(fmt.Sprintf("%v", age)), nil)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return data, err
+
+func (s *ps) Delete(id string) error {
+	return nil
 }

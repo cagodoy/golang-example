@@ -1,33 +1,40 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/darchlabs/api-example/pkg/api"
 	"github.com/darchlabs/api-example/pkg/storage"
+	personstorage "github.com/darchlabs/api-example/pkg/storage/person"
 )
 
 func main() {
 
-	// Open db
+	// load env
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatalf("invalid env PORT value")
+	}
+	
+	// open db
 	db, err := storage.New("storage.db")
 	if err != nil {
-		log.Fatalf("Bad db opening %w", err) // fatal kills
+		log.Fatalf("Bad db opening %s", err) // fatal kills
 	}
 
-	// Initialize storage with leveldb db
-	// s := person.New(db)
-
+	// intialize person storage
+	s := personstorage.New(db)
+	
 	// load router
-	router := api.NewRouter(db)
+	router := api.NewRouter(s)
 
 	// run api server
 	log.Println("runnning server...")
-	err := http.ListenAndServe(":3000", router)
+	err = http.ListenAndServe(fmt.Sprintf(":%s", port), router)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// storage.LevelDb()
 }
