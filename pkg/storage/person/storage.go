@@ -12,35 +12,37 @@ type ps struct {
 	DB *storage.DB
 }
 
+// Initialize an instance of DB (leveldv in this case)
 func New(s *storage.DB) *ps {
 	return &ps{
 		DB: s,
 	}
 }
 
+// Functions for interacting with the storage
 func (s *ps) List() ([]*person.Person, error) {
-	// // format the composed prefix key used in db
-	// prefix := "Name:Age:"
+	// Create slice where the values will be returned
+	data := make([]*person.Person, 0)
 
-	// data := make([]*Person, 0)
+	// Iterate over the values and append them to the slice
+	iter := s.DB.DB.NewIterator(nil, nil)
+	for iter.Next() {
+		var logData *person.Person
+		err := json.Unmarshal(iter.Value(), &logData)
+		if err != nil {
+			return nil, err
+		}
 
-	// iter := s.storage.DB.NewIterator(util.BytesPrefix([]byte(prefix)), nil)
-	// for iter.Next() {
-	// 	var pperson *Person
+		data = append(data, logData)
+	}
+	iter.Release()
 
-	// 	data = append(data, pperson)
+	err := iter.Error()
+	if err != nil {
+		return nil, err
+	}
 
-	// }
-
-	// iter.Release()
-	// err := iter.Error()
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// return data, nil
-	return nil, nil
+	return data, nil
 }
 
 func (s *ps) Create(p *person.Person) (*person.Person, error) {
@@ -68,7 +70,7 @@ func (s *ps) Create(p *person.Person) (*person.Person, error) {
 	return p, nil
 }
 
-// func (s *Storage) GetPersonByAge(age int64) ([]byte, error) {
+// func (s *Storage) GetPersonById(id string) ([]byte, error) {
 // 	data, err := s.storage.DB.Get([]byte(fmt.Sprintf("%v", age)), nil)
 
 // 	if err != nil {

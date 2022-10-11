@@ -12,15 +12,14 @@ func listPersonsHandler(ps PersonStorage) func(w http.ResponseWriter, r *http.Re
 		// set headers
 		w.Header().Set("Content-Type", "application/json")
 
-		// pp, err := s.GetPersons()
-		// if err != nil {
-		// 	return
-		// }
+		pp, err := ps.List()
+		if err != nil {
+			return
+		}
 
 		// get values to response
 		res := response{
-			// Data: pp,
-			Data: nil,
+			Data: pp,
 		}
 
 		// prepare response to api
