@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -17,14 +18,14 @@ func createPersonsHandler(ps PersonStorage) func(w http.ResponseWriter, r *http.
 		// // read body bytes
 		// b, err := ioutil.ReadAll(r.Body)
 		// if err != nil {
-		// 	// 500? 
+		// 	// 500?
 		// 	log.Fatalln("readAll error", err)
 		// }
 
 		// fmt.Println("BODY", string(b))
-		
+
 		// prepare struct for body
-		body := &struct{
+		body := &struct {
 			Person *person.Person `json:"person"`
 		}{}
 
@@ -43,7 +44,23 @@ func createPersonsHandler(ps PersonStorage) func(w http.ResponseWriter, r *http.
 			// error
 		}
 
-		// TODO(nb): validate json schema
+		// Validate json schema data
+		personBody := body.Person
+		if personBody == nil {
+			log.Fatalln("Person map is nil")
+		}
+
+		name := body.Person.Name
+		nameType := fmt.Sprintf("%T", name)
+		if name == "" || nameType != "string" {
+			log.Fatalf("Bad 'name' param passed: expected a not empty string, received %v with a type of %v", name, nameType)
+		}
+
+		age := body.Person.Age
+		ageType := fmt.Sprintf("%T", body.Person.Age)
+		if age == 0 || ageType != "int64" {
+			log.Fatalf("Bad 'age' param passed: expected a not empty string, received %v with a type of %v", age, ageType)
+		}
 
 		// created person in storage
 		created, err := ps.Create(body.Person)

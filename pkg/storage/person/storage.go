@@ -18,7 +18,6 @@ func New(s *storage.DB) *ps {
 	}
 }
 
-
 func (s *ps) List() ([]*person.Person, error) {
 	// // format the composed prefix key used in db
 	// prefix := "Name:Age:"
