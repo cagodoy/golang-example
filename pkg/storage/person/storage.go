@@ -27,13 +27,13 @@ func (s *ps) List() ([]*person.Person, error) {
 	// Iterate over the values and append them to the slice
 	iter := s.DB.DB.NewIterator(nil, nil)
 	for iter.Next() {
-		var logData *person.Person
-		err := json.Unmarshal(iter.Value(), &logData)
+		var pperson *person.Person
+		err := json.Unmarshal(iter.Value(), &pperson)
 		if err != nil {
 			return nil, err
 		}
 
-		data = append(data, logData)
+		data = append(data, pperson)
 	}
 	iter.Release()
 
@@ -70,15 +70,59 @@ func (s *ps) Create(p *person.Person) (*person.Person, error) {
 	return p, nil
 }
 
-// func (s *Storage) GetPersonById(id string) ([]byte, error) {
-// 	data, err := s.storage.DB.Get([]byte(fmt.Sprintf("%v", age)), nil)
+func (s *ps) GetPersonById(id string) (*person.Person, error) {
+	data, err := s.DB.DB.Get([]byte(id), nil)
+	if err != nil {
+		return nil, err
+	}
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	var pperson *person.Person
 
-// 	return data, err
+	err = json.Unmarshal(data, &pperson)
+	if err != nil {
+		return nil, err
+	}
 
-func (s *ps) Delete(id string) error {
-	return nil
+	return pperson, err
+}
+
+func (s *ps) UpdatePersonById(id string, p *person.Person) (*person.Person, error) {
+	p.Id = id
+	b, err := json.Marshal(p)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.DB.DB.Put([]byte(id), b, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	pperson, err := s.GetPersonById(p.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return pperson, nil
+
+}
+
+func (s *ps) DeletePersonById(id string) (*person.Person, error) {
+	data, err := s.DB.DB.Get([]byte(id), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var pperson *person.Person
+	err = json.Unmarshal(data, &pperson)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.DB.DB.Delete([]byte(id), nil)
+	return pperson, err
 }
