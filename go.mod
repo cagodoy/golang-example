@@ -3,6 +3,7 @@ module github.com/darchlabs/api-example
 go 1.17
 
 require (
+	github.com/joho/godotenv v1.4.0
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/teris-io/shortid v0.0.0-20220617161101-71ec9f2aa569
