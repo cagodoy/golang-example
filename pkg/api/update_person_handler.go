@@ -23,6 +23,20 @@ func updatePersonHandler(ps PersonStorage) func(w http.ResponseWriter, r *http.R
 			// error
 		}
 
+		// Validate  req params
+		if id == "" {
+			log.Fatalln("No id provided")
+		}
+
+		// Validate body
+		if body.Person.Name == "" {
+			log.Fatalln("Name cannot be empty")
+		}
+
+		if body.Person.Age == 0 {
+			log.Fatalln("Age cannot be zero")
+		}
+
 		pp, err := ps.UpdatePersonById(id, body.Person)
 		if err != nil {
 			log.Fatalln("decoder.Decode error", err)

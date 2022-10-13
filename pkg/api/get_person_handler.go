@@ -2,34 +2,23 @@ package api
 
 import (
 	"encoding/json"
-	"net/http"
-
-	// personstorage "github.com/darchlabs/api-example/pkg/storage/person"
-
-	"github.com/julienschmidt/httprouter"
+	"fmt"
 )
 
-func getPersonHandler(ps PersonStorage) func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		// set headers
-		w.Header().Set("Content-Type", "application/json")
+// personstorage "github.com/darchlabs/api-example/pkg/storage/person"
 
-		id := r.FormValue("id")
+func getPersonHandler(ctx handlerCtx) handlerRes {
+	// set headers
+	ctx.w.Header().Set("Content-Type", "application/json")
 
-		pp, err := ps.GetPersonById(id)
-		if err != nil {
-			return
-		}
+	id := ctx.r.FormValue("id")
 
-		// get values to response
-		res := response{
-			Data: pp,
-		}
-
-		// prepare response to api
-		if err := json.NewEncoder(w).Encode(res); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	pp, err := ctx.ps.GetPersonById(id)
+	if err != nil {
+		return handlerRes{"", 500, err}
 	}
+
+	ppString := fmt.Sprint(json.Marshal(pp))
+
+	return handlerRes{ppString, 200, nil}
 }
