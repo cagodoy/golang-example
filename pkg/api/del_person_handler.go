@@ -17,5 +17,4 @@ func (*DelPersonHandler) Invoke(ctx *handlerCtx) *handlerRes {
 	}
 
 	return &handlerRes{pp, 200, nil}
-
 }

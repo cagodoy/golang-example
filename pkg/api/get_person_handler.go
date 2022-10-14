@@ -11,9 +11,6 @@ func NewGetPersonHandler(ps PersonStorage) *GetPersonHandler {
 }
 
 func (*GetPersonHandler) Invoke(ctx *handlerCtx) *handlerRes {
-	// set headers
-	ctx.w.Header().Set("Content-Type", "application/json")
-
 	id := ctx.r.FormValue("id")
 
 	pp, err := ctx.ps.GetPersonById(id)

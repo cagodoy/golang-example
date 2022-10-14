@@ -2,10 +2,15 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/darchlabs/api-example/pkg/person"
+	"github.com/go-playground/validator/v10"
 )
+
+type CreatePersonHandlerInputs struct {
+	Name string `validate:"required"`
+	Age  int64  `validate:"required"`
+}
 
 type CreatePersonHandler struct {
 	storage PersonStorage
@@ -18,8 +23,9 @@ func NewCreatePersonHandler(ps PersonStorage) *CreatePersonHandler {
 }
 
 func (cp CreatePersonHandler) Invoke(ctx *handlerCtx) *handlerRes {
-	// set headers
-	ctx.w.Header().Set("Content-Type", "application/json")
+	// Validate json schema data
+	validate := validator.New()
+	validate.Struct(ctx.ps)
 
 	// prepare struct for body
 	body := &struct {
@@ -31,24 +37,6 @@ func (cp CreatePersonHandler) Invoke(ctx *handlerCtx) *handlerRes {
 	err := decoder.Decode(&body)
 	if err != nil {
 		return &handlerRes{err.Error(), 500, err}
-	}
-
-	// Validate json schema data
-	personBody := body.Person
-	if personBody == nil {
-		return &handlerRes{err.Error(), 500, err}
-	}
-
-	name := body.Person.Name
-	nameType := fmt.Sprintf("%T", name)
-	if name == "" || nameType != "string" {
-		return &handlerRes{"Invalid name param", 500, err}
-	}
-
-	age := body.Person.Age
-	ageType := fmt.Sprintf("%T", body.Person.Age)
-	if age == 0 || ageType != "int64" {
-		return &handlerRes{"Invalid age param", 500, err}
 	}
 
 	// created person in storage

@@ -9,9 +9,6 @@ func NewListPersonsHandler(ps PersonStorage) *ListPersonsHandler {
 }
 
 func (*ListPersonsHandler) Invoke(ctx *handlerCtx) *handlerRes {
-	// set headers
-	ctx.w.Header().Set("Content-Type", "application/json")
-
 	pp, err := ctx.ps.List()
 	if err != nil {
 		return &handlerRes{err.Error(), 500, err}

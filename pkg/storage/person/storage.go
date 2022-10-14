@@ -96,6 +96,12 @@ func (s *ps) GetPersonById(id string) (*person.Person, error) {
 
 func (s *ps) UpdatePersonById(id string, p *person.Person) (*person.Person, error) {
 	p.Id = id
+	// If a person with that id doesn't exist, it should fail
+	_, err := s.GetPersonById(p.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	b, err := json.Marshal(p)
 	if err != nil {
 		return nil, err
@@ -106,13 +112,7 @@ func (s *ps) UpdatePersonById(id string, p *person.Person) (*person.Person, erro
 		return nil, err
 	}
 
-	pperson, err := s.GetPersonById(p.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	return pperson, nil
-
+	return p, nil
 }
 
 func (s *ps) DeletePersonById(id string) (*person.Person, error) {
