@@ -1,5 +1,3 @@
-PORT=5500
-
 dev:
 	@echo "[dev] Running":
-	@PORT=$(PORT) go run cmd/api/main.go
+	@nodemon --exec go run cmd/api/main.go --signal SIGTERM 
