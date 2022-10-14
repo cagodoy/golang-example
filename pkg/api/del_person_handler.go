@@ -1,32 +1,21 @@
 package api
 
-import (
-	"encoding/json"
-	"log"
-	"net/http"
+type DelPersonHandler struct {
+	storage PersonStorage
+}
 
-	// personstorage "github.com/darchlabs/api-example/pkg/storage/person"
+func NewDelPersonHandler(ps PersonStorage) *DelPersonHandler {
+	return &DelPersonHandler{storage: ps}
+}
 
-	"github.com/julienschmidt/httprouter"
-)
+func (*DelPersonHandler) Invoke(ctx *handlerCtx) *handlerRes {
+	id := ctx.r.FormValue("id")
 
-func delPersonHandler(ps PersonStorage) func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		id := r.FormValue("id")
-
-		pp, err := ps.DeletePersonById(id)
-		if err != nil {
-			log.Fatalf("Error when trying to delete a person by id: %v", err)
-		}
-
-		res := response{
-			Data: pp,
-		}
-
-		// prepare response to api
-		if err := json.NewEncoder(w).Encode(res); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	pp, err := ctx.ps.DeletePersonById(id)
+	if err != nil {
+		return &handlerRes{err.Error(), 500, err}
 	}
+
+	return &handlerRes{pp, 200, nil}
+
 }

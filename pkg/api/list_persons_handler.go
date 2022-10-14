@@ -1,31 +1,21 @@
 package api
 
-import (
-	"encoding/json"
-	"net/http"
+type ListPersonsHandler struct {
+	storage PersonStorage
+}
 
-	"github.com/julienschmidt/httprouter"
-)
+func NewListPersonsHandler(ps PersonStorage) *ListPersonsHandler {
+	return &ListPersonsHandler{storage: ps}
+}
 
-func listPersonsHandler(ps PersonStorage) func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		// set headers
-		w.Header().Set("Content-Type", "application/json")
+func (*ListPersonsHandler) Invoke(ctx *handlerCtx) *handlerRes {
+	// set headers
+	ctx.w.Header().Set("Content-Type", "application/json")
 
-		pp, err := ps.List()
-		if err != nil {
-			return
-		}
-
-		// get values to response
-		res := response{
-			Data: pp,
-		}
-
-		// prepare response to api
-		if err := json.NewEncoder(w).Encode(res); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	pp, err := ctx.ps.List()
+	if err != nil {
+		return &handlerRes{err.Error(), 500, err}
 	}
+
+	return &handlerRes{pp, 200, nil}
 }

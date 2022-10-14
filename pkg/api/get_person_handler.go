@@ -1,13 +1,16 @@
 package api
 
-import (
-	"encoding/json"
-	"fmt"
-)
+type GetPersonHandler struct {
+	storage PersonStorage
+}
 
-// personstorage "github.com/darchlabs/api-example/pkg/storage/person"
+func NewGetPersonHandler(ps PersonStorage) *GetPersonHandler {
+	return &GetPersonHandler{
+		storage: ps,
+	}
+}
 
-func getPersonHandler(ctx handlerCtx) handlerRes {
+func (*GetPersonHandler) Invoke(ctx *handlerCtx) *handlerRes {
 	// set headers
 	ctx.w.Header().Set("Content-Type", "application/json")
 
@@ -15,10 +18,8 @@ func getPersonHandler(ctx handlerCtx) handlerRes {
 
 	pp, err := ctx.ps.GetPersonById(id)
 	if err != nil {
-		return handlerRes{"", 500, err}
+		return &handlerRes{err.Error(), 500, err}
 	}
 
-	ppString := fmt.Sprint(json.Marshal(pp))
-
-	return handlerRes{ppString, 200, nil}
+	return &handlerRes{pp, 200, nil}
 }
