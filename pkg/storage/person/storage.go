@@ -10,13 +10,20 @@ import (
 
 type ps struct {
 	DB *storage.DB
+	id *shortid.Shortid
 }
 
 // Initialize an instance of DB (leveldv in this case)
-func New(s *storage.DB) *ps {
+func New(s *storage.DB) (*ps, error) {
+	idGenerator, err := shortid.New(1, "-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_", 2342)
+	if err != nil {
+		return nil, err
+	}
+
 	return &ps{
 		DB: s,
-	}
+		id: idGenerator,
+	}, nil
 }
 
 // Functions for interacting with the storage
@@ -47,7 +54,8 @@ func (s *ps) List() ([]*person.Person, error) {
 
 func (s *ps) Create(p *person.Person) (*person.Person, error) {
 	// generate id for database
-	id, err := shortid.Generate()
+
+	id, err := s.id.Generate()
 	if err != nil {
 		return nil, err
 	}
