@@ -35,7 +35,10 @@ func main() {
 	}
 
 	// intialize person storage
-	s := personstorage.New(db)
+	s, err := personstorage.New(db)
+	if err != nil {
+		log.Fatalf("There was an error while creating person storage: %v", err)
+	}
 
 	// load router
 	router := api.NewRouter(s)
