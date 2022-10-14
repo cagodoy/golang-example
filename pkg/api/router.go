@@ -74,21 +74,27 @@ func NewRouter(ps PersonStorage) *httprouter.Router {
 // Func that receives the returns from handlers and creates an http response
 func HandleFunc(fn handler, ps *PersonStorage) func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		// set headers
+		w.Header().Set("Content-Type", "application/json")
 
+		// Set handler context
 		ctx := &handlerCtx{ps: *ps, w: w, r: *r}
-		handlerRes := fn(ctx)
 
+		// Exec handler func and get its response
+		handlerRes := fn(ctx)
 		payload, statusCode, err := handlerRes.Payload, handlerRes.HttpStatus, handlerRes.err
 		if err != nil {
+			// Response an error if sthing fails
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
 
+		// Prepare response
 		res := response{
 			Meta: map[string]interface{}{"status_code": statusCode},
 			Data: payload,
 		}
 
+		// Send response
 		json.NewEncoder(w).Encode(res)
 	}
 }
