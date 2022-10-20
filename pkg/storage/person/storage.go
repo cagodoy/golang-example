@@ -54,12 +54,10 @@ func (s *ps) List() ([]*person.Person, error) {
 }
 
 func (s *ps) Create(p *person.Person) (*person.Person, error) {
-	if p.Name == "" {
-		return nil, fmt.Errorf("%s", "Empty Name param in person")
-	}
-
-	if p.Age == 0 {
-		return nil, fmt.Errorf("%s", "Age param in person cannot be zero")
+	// validate age and name person params
+	err := s.validateAgeAndName(p.Name, p.Age)
+	if err != nil {
+		return nil, err
 	}
 
 	// TODO(nb): Add validation if the person already exists, it shouldn't be created
@@ -89,8 +87,10 @@ func (s *ps) Create(p *person.Person) (*person.Person, error) {
 }
 
 func (s *ps) GetPersonById(id string) (*person.Person, error) {
-	if id == "" {
-		return nil, fmt.Errorf("%s", "Empty filepath param")
+	// validate id
+	err := s.validateId(id)
+	if err != nil {
+		return nil, err
 	}
 
 	data, err := s.DB.DB.Get([]byte(id), nil)
@@ -109,21 +109,21 @@ func (s *ps) GetPersonById(id string) (*person.Person, error) {
 }
 
 func (s *ps) UpdatePersonById(id string, p *person.Person) (*person.Person, error) {
-	if id == "" {
-		return nil, fmt.Errorf("%s", "Empty filepath param")
+	// validate id
+	err := s.validateId(id)
+	if err != nil {
+		return nil, err
 	}
 
-	if p.Name == "" {
-		return nil, fmt.Errorf("%s", "Empty Name param in person")
-	}
-
-	if p.Age == 0 {
-		return nil, fmt.Errorf("%s", "Age param in person cannot be zero")
+	// validate age and name person params
+	err = s.validateAgeAndName(p.Name, p.Age)
+	if err != nil {
+		return nil, err
 	}
 
 	p.Id = id
 	// If a person with that id doesn't exist, it should fail
-	_, err := s.GetPersonById(p.Id)
+	_, err = s.GetPersonById(p.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +142,10 @@ func (s *ps) UpdatePersonById(id string, p *person.Person) (*person.Person, erro
 }
 
 func (s *ps) DeletePersonById(id string) (*person.Person, error) {
-	if id == "" {
-		return nil, fmt.Errorf("%s", "Empty filepath param")
+	// validate id
+	err := s.validateId(id)
+	if err != nil {
+		return nil, err
 	}
 
 	data, err := s.DB.DB.Get([]byte(id), nil)
@@ -163,4 +165,25 @@ func (s *ps) DeletePersonById(id string) (*person.Person, error) {
 
 	err = s.DB.DB.Delete([]byte(id), nil)
 	return p, err
+}
+
+/* Validator functions */
+func (s *ps) validateId(id string) error {
+	if id == "" {
+		return fmt.Errorf("%s", "Empty id param")
+	}
+
+	return nil
+}
+
+func (s *ps) validateAgeAndName(name string, age int64) error {
+	if name == "" {
+		return fmt.Errorf("%s", "Empty name param")
+	}
+
+	if age == 0 {
+		return fmt.Errorf("%s", "Age cannot be zero")
+	}
+
+	return nil
 }
