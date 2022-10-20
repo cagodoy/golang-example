@@ -60,7 +60,27 @@ func (s *ps) Create(p *person.Person) (*person.Person, error) {
 		return nil, err
 	}
 
-	// TODO(nb): Add validation if the person already exists, it shouldn't be created
+	// Validate if the person already exists iterating over and comparing them w params
+	iter := s.DB.DB.NewIterator(nil, nil)
+	for iter.Next() {
+		var person *person.Person
+		err := json.Unmarshal(iter.Value(), &person)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if person.Name == p.Name || person.Age == p.Age {
+			return nil, fmt.Errorf("%s", "This person already exists")
+		}
+
+	}
+	iter.Release()
+
+	err = iter.Error()
+	if err != nil {
+		return nil, err
+	}
 
 	// generate id for database
 	id, err := s.id.Generate()
