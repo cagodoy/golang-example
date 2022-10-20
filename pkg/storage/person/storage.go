@@ -2,6 +2,7 @@ package personstorage
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/darchlabs/api-example/pkg/person"
 	"github.com/darchlabs/api-example/pkg/storage"
@@ -34,13 +35,13 @@ func (s *ps) List() ([]*person.Person, error) {
 	// Iterate over the values and append them to the slice
 	iter := s.DB.DB.NewIterator(nil, nil)
 	for iter.Next() {
-		var pperson *person.Person
-		err := json.Unmarshal(iter.Value(), &pperson)
+		var p *person.Person
+		err := json.Unmarshal(iter.Value(), &p)
 		if err != nil {
 			return nil, err
 		}
 
-		data = append(data, pperson)
+		data = append(data, p)
 	}
 	iter.Release()
 
@@ -53,8 +54,17 @@ func (s *ps) List() ([]*person.Person, error) {
 }
 
 func (s *ps) Create(p *person.Person) (*person.Person, error) {
-	// generate id for database
+	if p.Name == "" {
+		return nil, fmt.Errorf("%s", "Empty Name param in person")
+	}
 
+	if p.Age == 0 {
+		return nil, fmt.Errorf("%s", "Age param in person cannot be zero")
+	}
+
+	// TODO(nb): Add validation if the person already exists, it shouldn't be created
+
+	// generate id for database
 	id, err := s.id.Generate()
 	if err != nil {
 		return nil, err
@@ -79,22 +89,38 @@ func (s *ps) Create(p *person.Person) (*person.Person, error) {
 }
 
 func (s *ps) GetPersonById(id string) (*person.Person, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%s", "Empty filepath param")
+	}
+
 	data, err := s.DB.DB.Get([]byte(id), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var pperson *person.Person
+	var p *person.Person
 
-	err = json.Unmarshal(data, &pperson)
+	err = json.Unmarshal(data, &p)
 	if err != nil {
 		return nil, err
 	}
 
-	return pperson, err
+	return p, err
 }
 
 func (s *ps) UpdatePersonById(id string, p *person.Person) (*person.Person, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%s", "Empty filepath param")
+	}
+
+	if p.Name == "" {
+		return nil, fmt.Errorf("%s", "Empty Name param in person")
+	}
+
+	if p.Age == 0 {
+		return nil, fmt.Errorf("%s", "Age param in person cannot be zero")
+	}
+
 	p.Id = id
 	// If a person with that id doesn't exist, it should fail
 	_, err := s.GetPersonById(p.Id)
@@ -116,13 +142,17 @@ func (s *ps) UpdatePersonById(id string, p *person.Person) (*person.Person, erro
 }
 
 func (s *ps) DeletePersonById(id string) (*person.Person, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%s", "Empty filepath param")
+	}
+
 	data, err := s.DB.DB.Get([]byte(id), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var pperson *person.Person
-	err = json.Unmarshal(data, &pperson)
+	var p *person.Person
+	err = json.Unmarshal(data, &p)
 	if err != nil {
 		return nil, err
 	}
@@ -132,5 +162,5 @@ func (s *ps) DeletePersonById(id string) (*person.Person, error) {
 	}
 
 	err = s.DB.DB.Delete([]byte(id), nil)
-	return pperson, err
+	return p, err
 }
