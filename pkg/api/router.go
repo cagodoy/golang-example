@@ -90,7 +90,7 @@ func HandleFunc(fn handler, ps *PersonStorage) func(w http.ResponseWriter, r *ht
 
 		// Prepare response
 		res := response{
-			Meta: map[string]interface{}{"status_code": statusCode},
+			Meta: map[string]interface{}{"statusCode": statusCode},
 			Data: payload,
 		}
 
