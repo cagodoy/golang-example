@@ -7,11 +7,6 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type UpdatePersonHandlerInputs struct {
-	Name string `validate:"required"`
-	Age  int64  `validate:"required"`
-}
-
 type UpdatePersonHandler struct {
 	storage PersonStorage
 }
@@ -31,7 +26,7 @@ func (*UpdatePersonHandler) Invoke(ctx *handlerCtx) *handlerRes {
 	// Define structure for parse body
 	body := &struct {
 		Person *person.Person `json:"person"`
-	}{} // TODO(ca): What does this second '{}' means?
+	}{}
 
 	// Parse body
 	decoder := json.NewDecoder(ctx.r.Body)
