@@ -1,16 +1,16 @@
 package person
 
 type Person struct {
-	Id string `json:"id,omitempty"`
-	Name string `json:"name"`
-	Age  int64  `json:"age"`
+	Id   string `json:"id,omitempty"`
+	Name string `json:"name" validate:"required"`
+	Age  int64  `json:"age" validate:"required"`
 }
 
 func New(name string, age int64) *Person {
 	return &Person{
 		Name: name,
-		Age: age,
-	}	
+		Age:  age,
+	}
 }
 
 // composition over inheritance
